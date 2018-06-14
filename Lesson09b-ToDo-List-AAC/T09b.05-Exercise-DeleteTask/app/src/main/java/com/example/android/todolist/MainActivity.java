@@ -27,6 +27,7 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
 
 import com.example.android.todolist.database.AppDatabase;
+import com.example.android.todolist.database.TaskDao;
 import com.example.android.todolist.database.TaskEntry;
 
 import java.util.List;
@@ -76,11 +77,22 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.ItemC
 
             // Called when a user swipes left or right on a ViewHolder
             @Override
-            public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
+            public void onSwiped(final RecyclerView.ViewHolder viewHolder, int swipeDir) {
                 // Here is where you'll implement swipe to delete
                 // TODO (1) Get the diskIO Executor from the instance of AppExecutors and
                 // call the diskIO execute method with a new Runnable and implement its run method
+                AppExecutors appExecutors = AppExecutors.getInstance();
+                appExecutors.diskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        int position = viewHolder.getAdapterPosition();
+                        mDb.taskDao().deleteTask(mAdapter.getTaskEntries().get(position));
 
+
+                    }
+                });
+
+                retrieveTasks();
                 // TODO (3) get the position from the viewHolder parameter
                 // TODO (4) Call deleteTask in the taskDao with the task at that position
                 // TODO (6) Call retrieveTasks method to refresh the UI
@@ -115,6 +127,16 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.ItemC
     protected void onResume() {
         super.onResume();
         // TODO (5) Extract the logic to a retrieveTasks method so it can be reused
+        retrieveTasks();
+
+    }
+
+    @Override
+    public void onItemClickListener(int itemId) {
+        // Launch AddTaskActivity adding the itemId as an extra in the intent
+    }
+
+    private void retrieveTasks(){
         AppExecutors.getInstance().diskIO().execute(new Runnable() {
             @Override
             public void run() {
@@ -129,10 +151,5 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.ItemC
                 });
             }
         });
-    }
-
-    @Override
-    public void onItemClickListener(int itemId) {
-        // Launch AddTaskActivity adding the itemId as an extra in the intent
     }
 }

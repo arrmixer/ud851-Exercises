@@ -46,7 +46,8 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.ItemC
     private RecyclerView mRecyclerView;
     private TaskAdapter mAdapter;
 
-    private AppDatabase mDb;
+//    private AppDatabase mDb;
+    private MainViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.ItemC
                     public void run() {
                         int position = viewHolder.getAdapterPosition();
                         List<TaskEntry> tasks = mAdapter.getTasks();
-                        mDb.taskDao().deleteTask(tasks.get(position));
+                        viewModel.deleteTask(tasks.get(position));
                     }
                 });
             }
@@ -109,12 +110,11 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.ItemC
             }
         });
 
-        mDb = AppDatabase.getInstance(getApplicationContext());
         setupViewModel();
     }
 
     private void setupViewModel() {
-        MainViewModel viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+        viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
         viewModel.getTasks().observe(this, new Observer<List<TaskEntry>>() {
             @Override
             public void onChanged(@Nullable List<TaskEntry> taskEntries) {

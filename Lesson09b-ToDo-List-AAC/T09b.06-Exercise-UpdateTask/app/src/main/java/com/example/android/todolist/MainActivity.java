@@ -38,6 +38,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.ItemC
 
     // Constant for logging
     private static final String TAG = MainActivity.class.getSimpleName();
+
     // Member variables for the adapter and RecyclerView
     private RecyclerView mRecyclerView;
     private TaskAdapter mAdapter;
@@ -142,5 +143,8 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.ItemC
     public void onItemClickListener(int itemId) {
         // Launch AddTaskActivity adding the itemId as an extra in the intent
         // TODO (2) Launch AddTaskActivity with itemId as extra for the key AddTaskActivity.EXTRA_TASK_ID
+        Intent updateTaskIntent = new Intent(MainActivity.this, AddTaskActivity.class);
+        updateTaskIntent.putExtra(AddTaskActivity.EXTRA_TASK_ID, itemId);
+        startActivity(updateTaskIntent);
     }
 }
