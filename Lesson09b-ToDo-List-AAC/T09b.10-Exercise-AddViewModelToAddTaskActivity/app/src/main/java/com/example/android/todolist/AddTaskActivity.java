@@ -1,18 +1,18 @@
 /*
-* Copyright (C) 2016 The Android Open Source Project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (C) 2016 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.example.android.todolist;
 
@@ -64,12 +64,13 @@ public class AddTaskActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_task);
 
         initViews();
-
-
+        AddTaskViewModelFactory modelFactory = new AddTaskViewModelFactory(getApplication());
+        taskViewModel = ViewModelProviders.of(this, modelFactory).get(AddTaskViewModel.class);
 
         if (savedInstanceState != null && savedInstanceState.containsKey(INSTANCE_TASK_ID)) {
             mTaskId = savedInstanceState.getInt(INSTANCE_TASK_ID, DEFAULT_TASK_ID);
         }
+
 
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra(EXTRA_TASK_ID)) {
@@ -85,14 +86,11 @@ public class AddTaskActivity extends AppCompatActivity {
                 // TODO (11) Declare a AddTaskViewModel variable and initialize it by calling ViewModelProviders.of
                 // for that use the factory created above AddTaskViewModel
                 // TODO (12) Observe the LiveData object in the ViewModel. Use it also when removing the observer
-                TasksRepository repository = new TasksRepository(getApplication());
-                db = repository.getDb();
-                AddTaskViewModelFactory modelFactory = new AddTaskViewModelFactory(getApplication(), mTaskId);
-                final AddTaskViewModel taskViewModel = ViewModelProviders.of(this, modelFactory).get(AddTaskViewModel.class);
-                taskViewModel.getTask().observe(this, new Observer<TaskEntry>() {
+
+                taskViewModel.getTask(mTaskId).observe(this, new Observer<TaskEntry>() {
                     @Override
                     public void onChanged(@Nullable TaskEntry taskEntry) {
-                        taskViewModel.getTask().removeObserver(this);
+                        taskViewModel.getTask(mTaskId).removeObserver(this);
                         Log.d(TAG, "Receiving database update from LiveData");
                         populateUI(taskEntry);
                     }
@@ -152,11 +150,21 @@ public class AddTaskActivity extends AppCompatActivity {
             public void run() {
                 if (mTaskId == DEFAULT_TASK_ID) {
                     // insert new task
-                    taskViewModel.insertTask(task);
+                    AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            taskViewModel.insertTask(task);
+                        }
+                    });
                 } else {
                     //update task
-                    task.setId(mTaskId);
-                    taskViewModel.updateTask(task);
+                    AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            task.setId(mTaskId);
+                            taskViewModel.updateTask(task);
+                        }
+                    });
                 }
                 finish();
             }

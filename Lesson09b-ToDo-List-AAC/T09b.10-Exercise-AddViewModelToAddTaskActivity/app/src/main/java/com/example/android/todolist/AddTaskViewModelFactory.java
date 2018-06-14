@@ -12,13 +12,12 @@ public class AddTaskViewModelFactory extends ViewModelProvider.NewInstanceFactor
 
     // TODO (2) Add two member variables. One for the database and one for the mTaskId
     private TasksRepository mTasksRepository;
-    private final int mTaskId;
+//    private final int mTaskId;
     private Application mApplication;
     // TODO (3) Initialize the member variables in the constructor with the parameters received
 
-    public AddTaskViewModelFactory(Application application, int taskId) {
+    public AddTaskViewModelFactory(Application application) {
         mTasksRepository = new TasksRepository(application);
-        this.mTaskId = taskId;
         this.mApplication = application;
     }
 
@@ -27,6 +26,6 @@ public class AddTaskViewModelFactory extends ViewModelProvider.NewInstanceFactor
     @Override
     public <T extends ViewModel> T create(Class<T> modelClass) {
         //noinspection unchecked
-        return (T) new AddTaskViewModel(mApplication, mTaskId);
+        return (T) new AddTaskViewModel(mApplication);
     }
 }

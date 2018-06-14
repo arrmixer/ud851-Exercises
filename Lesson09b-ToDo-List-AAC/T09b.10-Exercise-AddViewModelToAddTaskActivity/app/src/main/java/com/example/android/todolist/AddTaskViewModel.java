@@ -21,18 +21,16 @@ public class AddTaskViewModel extends AndroidViewModel {
     // TODO (8) Create a constructor where you call loadTaskById of the taskDao to initialize the tasks variable
     // Note: The constructor should receive the database and the taskId
 
-    public AddTaskViewModel(@NonNull Application application, int taskId) {
+    public AddTaskViewModel(@NonNull Application application) {
         super(application);
         mTasksRepository = new TasksRepository(application);
-        task = mTasksRepository.loadTaskById(taskId);
     }
-
 
     // TODO (7) Create a getter for the task variable
 
 
-    public LiveData<TaskEntry> getTask() {
-        return task;
+    public LiveData<TaskEntry> getTask(int taskId) {
+        return mTasksRepository.loadTaskById(taskId);
     }
 
     public void insertTask(TaskEntry task) {
